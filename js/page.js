@@ -1,6 +1,4 @@
-let provider;
-let web3;
-let isValidBase58Input = false;
+let provider, web3, isValidBase58Input;
 const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 $(function() {
@@ -55,7 +53,7 @@ $(function() {
       // FIXME: Create these inputs for signalers
       const signalingContractAddress = $('#SIGNALING_CONTRACT_ADDR');
       const signalingContractNonce = $('#SIGNALING_CONTRACT_NONCE');
-      contract.signal(signalContractAddress, signalingContractNonce, encodedEdgewareAddress, function(err, txHash) {
+      contract.signal(signalingContractAddress, signalingContractNonce, encodedEdgewareAddress, function(err, txHash) {
         if (err) {
           console.log(err);
         } else {

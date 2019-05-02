@@ -6,6 +6,16 @@
   "author": "hello@commonwealth.im",
   "license": "MIT",
   "dependencies": {
-    "@ledgerhq/hw-app-eth": "^4.55.0"
+    "@ledgerhq/hw-app-eth": "^4.55.0",
+    "@ledgerhq/hw-transport-u2f": "^4.55.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/runtime": "^7.4.4",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
   }
 }
