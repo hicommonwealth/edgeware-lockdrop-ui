@@ -14,10 +14,13 @@ $(function() {
     let network = $('input[name="network"]:checked').val();
     if (network === 'mainnet') {
       $('#LOCKDROP_CONTRACT_ADDRESS').val(MAINNET_LOCKDROP);
+      $('#ETHERSCAN_LINK').attr('href', `https://etherscan.io/address/${MAINNET_LOCKDROP}`);
     } else if (network === 'ropsten') {
       $('#LOCKDROP_CONTRACT_ADDRESS').val(ROPSTEN_LOCKDROP);
+      $('#ETHERSCAN_LINK').attr('href', `https://etherscan.io/address/${ROPSTEN_LOCKDROP}`);
     } else {
       $('#LOCKDROP_CONTRACT_ADDRESS').val(MAINNET_LOCKDROP);
+      $('#ETHERSCAN_LINK').attr('href', `https://etherscan.io/address/${MAINNET_LOCKDROP}`);
     }
   });
 
@@ -50,13 +53,13 @@ $(function() {
     }
   });
 
-  $('button.metamask').click(async function() {
+  $('button.injectedWeb3').click(async function() {
     if (!getPublicKey()) {
       return;
     }
     // Setup ethereum connection and web3 provider
-    await enableMetamaskEthereumConnection();
-    setupMetamaskWeb3Provider();
+    await enableInjectedWeb3EthereumConnection();
+    setupInjectedWeb3Provider();
 
     // Grab form data
     let { returnTransaction, params, failure, reason } = await configureTransaction(true);
@@ -65,18 +68,18 @@ $(function() {
       return;
     }
     $('.participation-option').hide();
-    $('.participation-option.metamask').slideDown(100);
-    $('.participation-option.metamask .metamask-error').text('').hide();
-    $('.participation-option.metamask .metamask-success').text('').hide();
+    $('.participation-option.injectedWeb3').slideDown(100);
+    $('.participation-option.injectedWeb3 .injectedWeb3-error').text('').hide();
+    $('.participation-option.injectedWeb3 .injectedWeb3-success').text('').hide();
     // Send transaction if successfully configured transaction
     returnTransaction.send(params, function(err, txHash) {
       if (err) {
         console.log(err);
-        $('.participation-option.metamask .metamask-error').show()
+        $('.participation-option.injectedWeb3 .injectedWeb3-error').show()
           .text(err.message);
       } else {
         console.log(txHash);
-        $('.participation-option.metamask .metamask-success').show()
+        $('.participation-option.injectedWeb3 .injectedWeb3-success').show()
           .text('Success! Transaction submitted');
       }
     });
@@ -149,7 +152,7 @@ EDGEWARE_PUBLIC_KEY=${edgewarePublicKey}`;
   });
 });
 
-async function configureTransaction(isMetamask) {
+async function configureTransaction(isInjectedWeb3) {
   let failure = false;
   let returnTransaction, params, reason, args;
 
@@ -175,8 +178,8 @@ async function configureTransaction(isMetamask) {
           0 : ((lockdropLocktimeFormValue === 'lock6') ?
                1 : 2);
 
-    // Params are only needed for sending transactions directly i.e. from Metamask
-    if (isMetamask) {
+    // Params are only needed for sending transactions directly i.e. from InjectedWeb3
+    if (isInjectedWeb3) {
       const coinbaseAcct = await web3.eth.getCoinbase();
       params = {
         from: coinbaseAcct,
@@ -191,7 +194,7 @@ async function configureTransaction(isMetamask) {
       isValidator: validatorIntent,
     };
   } else {
-    if (isMetamask) {
+    if (isInjectedWeb3) {
       const coinbaseAcct = await web3.eth.getCoinbase();
       params = { from: coinbaseAcct, gasLimit: 150000 };
     }
@@ -201,7 +204,7 @@ async function configureTransaction(isMetamask) {
     let signalingContractNonce = $('#SIGNALING_CONTRACT_NONCE').val();
 
     let res = validateSignalingContractAddress(signalingContractAddress, signalingContractNonce);
-    if (!isMetamask && res.failure) {
+    if (!isInjectedWeb3 && res.failure) {
       return res;
     } else {
       signalingContractAddress = signalingContractAddress || params.from;
@@ -301,9 +304,9 @@ function validateSignalingContractAddress(contractAddress, nonce) {
 }
 
 /**
- * Setup web3 provider using Metamask's injected providers
+ * Setup web3 provider using InjectedWeb3's injected providers
  */
-function setupMetamaskWeb3Provider() {
+function setupInjectedWeb3Provider() {
   // Setup web3 provider
   if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
     // Web3 browser user detected. You can now use the provider.
@@ -326,9 +329,9 @@ function setupInfuraWeb3Provider() {
 }
 
 /**
- * Enable connection between browser and Metamask
+ * Enable connection between browser and InjectedWeb3
  */
-async function enableMetamaskEthereumConnection() {
+async function enableInjectedWeb3EthereumConnection() {
   try {
     await ethereum.enable();
   } catch (error) {

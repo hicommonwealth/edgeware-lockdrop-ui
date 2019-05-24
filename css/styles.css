@@ -266,7 +266,7 @@ input[type="submit"]:active {
     display: none;
 }
 
-.form-field button.metamask,
+.form-field button.injectedWeb3,
 .form-field button.unlock {
     background: #ec8118;
     color: #fff;
@@ -280,14 +280,14 @@ input[type="submit"]:active {
     color: #fff;
 }
 
-.metamask-error,
-.metamask-success {
+.injectedWeb3-error,
+.injectedWeb3-success {
     margin: 20px 0;
 }
-.metamask-error {
+.injectedWeb3-error {
     color: #d3363c;
 }
-.metamask-success {
+.injectedWeb3-success {
     color: #53a55b;
 }
 
