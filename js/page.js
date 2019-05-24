@@ -1,4 +1,5 @@
 let provider, web3;
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const MAINNET_LOCKDROP = '0x1b75b90e60070d37cfa9d87affd124bb345bf70a';
 const ROPSTEN_LOCKDROP = '0x111ee804560787E0bFC1898ed79DAe24F2457a04';
 const LOCKDROP_ABI = JSON.stringify([{"constant":true,"inputs":[],"name":"LOCK_START_TIME","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"LOCK_END_TIME","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"LOCK_DROP_PERIOD","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_origin","type":"address"},{"name":"_nonce","type":"uint32"}],"name":"addressFrom","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":false,"inputs":[{"name":"contractAddr","type":"address"},{"name":"nonce","type":"uint32"},{"name":"edgewareAddr","type":"bytes"}],"name":"signal","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"term","type":"uint8"},{"name":"edgewareAddr","type":"bytes"},{"name":"isValidator","type":"bool"}],"name":"lock","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"inputs":[{"name":"startTime","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":false,"name":"eth","type":"uint256"},{"indexed":false,"name":"lockAddr","type":"address"},{"indexed":false,"name":"term","type":"uint8"},{"indexed":false,"name":"edgewareAddr","type":"bytes"},{"indexed":false,"name":"isValidator","type":"bool"},{"indexed":false,"name":"time","type":"uint256"}],"name":"Locked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"contractAddr","type":"address"},{"indexed":false,"name":"edgewareAddr","type":"bytes"},{"indexed":false,"name":"time","type":"uint256"}],"name":"Signaled","type":"event"}]);
@@ -338,4 +339,46 @@ async function enableInjectedWeb3EthereumConnection() {
     // Handle error. Likely the user rejected the login:
     alert('Could not find Web3 provider/Ethereum wallet');
   }
+}
+
+function getPublicKeyFromBase58(inputString) {
+  return `0x${toHexString(decodeBase58(inputString)).slice(2).slice(0,-4)}`;
+}
+
+/**
+ * Encodes a Uint8Array (byte array) into a hex string
+ * @param {Uint8Array} bytes to convert to hex
+ */
+function toHexString(bytes) {
+  return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+}
+
+/**
+ * Decode a base58 string into a Uint8Array (byte array)
+ * @param {String} input to decode
+ */
+function decodeBase58(inputString) {
+  var d = [],   //the array for storing the stream of decoded bytes
+      b = [],   //the result byte array that will be returned
+      i,        //the iterator variable for the base58 string
+      j,        //the iterator variable for the byte array (d)
+      c,        //the carry amount variable that is used to overflow from the current byte to the next byte
+      n;        //a temporary placeholder variable for the current byte
+  for(i in inputString) { //loop through each base58 character in the input string
+      j = 0,                             //reset the byte iterator
+      c = BASE58_ALPHABET.indexOf( inputString[i] );             //set the initial carry amount equal to the current base58 digit
+      if(c < 0)                          //see if the base58 digit lookup is invalid (-1)
+          return undefined;              //if invalid base58 digit, bail out and return undefined
+      c || b.length ^ i ? i : b.push(0); //prepend the result array with a zero if the base58 digit is zero and non-zero characters haven't been seen yet (to ensure correct decode length)
+      while(j in d || c) {               //start looping through the bytes until there are no more bytes and no carry amount
+          n = d[j];                      //set the placeholder for the current byte
+          n = n ? n * 58 + c : c;        //shift the current byte 58 units and add the carry amount (or just add the carry amount if this is a new byte)
+          c = n >> 8;                    //find the new carry amount (1-byte shift of current byte value)
+          d[j] = n % 256;                //reset the current byte to the remainder (the carry amount will pass on the overflow)
+          j++                            //iterate to the next byte
+      }
+  }
+  while(j--)               //since the byte array is backwards, loop through it in reverse order
+      b.push( d[j] );      //append each byte to the result
+  return new Uint8Array(b) //return the final byte array in Uint8Array format
 }
