@@ -64,7 +64,7 @@ $(function() {
     }
     // Setup ethereum connection and web3 provider
     await enableInjectedWeb3EthereumConnection();
-    setupInjectedWeb3Provider();
+    setupWeb3Provider();
 
     // Grab form data
     let { returnTransaction, params, failure, reason } = await configureTransaction(true);
@@ -94,8 +94,8 @@ $(function() {
     if (!getPublicKey()) {
       return;
     }
-    setupInfuraWeb3Provider();
-    let { returnTransaction, params, failure, reason, args } = await configureTransaction(false);
+    setupWeb3Provider();
+    let { failure, reason, args } = await configureTransaction(false);
     if (failure) {
       alert(reason);
       return;
@@ -311,26 +311,16 @@ function validateSignalingContractAddress(contractAddress, nonce) {
 /**
  * Setup web3 provider using InjectedWeb3's injected providers
  */
-function setupInjectedWeb3Provider() {
+function setupWeb3Provider() {
   // Setup web3 provider
   if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
     // Web3 browser user detected. You can now use the provider.
     provider = window.ethereum || window.web3.currentProvider;
+  } else {
+    provider = new Web3.providers.HttpProvider('https://mainnet.infura.io');
   }
 
   web3 = new window.Web3(provider);
-}
-
-/**
- * Setup web3 provider using Infura Public Gateway
- */
-function setupInfuraWeb3Provider() {
-  if (typeof web3 !== 'undefined') {
-    web3 = new Web3(web3.currentProvider);
-  } else {
-    // Set the provider you want from Web3.providers
-    web3 = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io'));
-  }
 }
 
 /**
