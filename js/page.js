@@ -330,7 +330,7 @@ function setupWeb3Provider() {
  */
 async function enableInjectedWeb3EthereumConnection() {
   try {
-    await ethereum.enable();
+    ethereum.enable().then(console.log).catch(console.log);
   } catch (error) {
     // Handle error. Likely the user rejected the login:
     alert('Could not find Web3 provider/Ethereum wallet, defaulting to INFURA\n\nNote, you will not be able to use the Injected Web3 option.');
